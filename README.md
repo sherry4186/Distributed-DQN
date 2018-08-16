@@ -1,7 +1,7 @@
 # Distributed-DQN
 Distributed-DQN to play CartPole game using chainer
 
-the Distributed version of DQN (without "Prioritized" part) 
+(the Distributed version of DQN: without "Prioritized" part) 
 
 
 
