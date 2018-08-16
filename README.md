@@ -7,5 +7,6 @@ Distributed-DQN to play CartPole game using chainer
 
 Paper:
 
-Distributed Prioritized Experience Replay
+Distributed Prioritized Experience Replay:
+
 https://arxiv.org/abs/1803.00933
