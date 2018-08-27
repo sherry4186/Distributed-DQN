@@ -4,6 +4,7 @@ from chainer import Chain, optimizers, Variable, serializers, initializers
 from collections import deque
 import copy
 import gym
+import matplotlib.pyplot as plt
 import numpy as np
 import sys
 import pickle
@@ -134,6 +135,7 @@ class DQN(object):
 class DQNMaster(DQN):
     def __init__(self, n_st, n_act, seed=0):
         super(DQNMaster, self).__init__(n_st, n_act, seed=0)
+        self.train_freq = 1
 
     def load_experience(self, files, share_model_update_flag_file):
         if os.path.exists(share_model_update_flag_file):
@@ -141,8 +143,6 @@ class DQNMaster(DQN):
         for file in files:
             memory = pickle.load(open(file, 'rb'))
             self.memory.extend(memory)
-            if len(self.memory) > 500:
-                print('beyond 500 ! time:', timeit.default_timer())
             while len(self.memory) > self.memory_size:
                 self.memory.popleft()
             os.remove(file)
@@ -181,7 +181,6 @@ if __name__ == "__main__":
         action_list = [np.array([a]) for a in [-2.0, 2.0]]
         n_act = len(action_list)
 
-    print('time:', timeit.default_timer())
 
     # new
     agent = DQNMaster(n_st, n_act, seed)
@@ -210,6 +209,10 @@ if __name__ == "__main__":
     if os.path.exists(share_epsilon_file):
         os.remove(share_epsilon_file)
 
+    list_t = []
+    list_loss = []
+    i = 0
+
     end_flag_count = len(glob.glob(end_flag_folder + '*'))
     # while not (end_flag_file1 in end_flag_files and end_flag_file2 in end_flag_files):
     while end_flag_count < slave_number:
@@ -220,6 +223,35 @@ if __name__ == "__main__":
             agent.train()
             agent.save_model_share(share_model_file, share_model_file_bk, share_model_update_flag_file)
             agent.save_epsilon(share_epsilon_file)
+            
+            i += 1
+            print("episode_num" + str(i))
+            observation = env.reset()
+            for t in range(400):
+                env.render()
+                state = observation.astype(np.float32).reshape((1, n_st))
+                act_i = agent.get_action(state)[0]
+                action = action_list[act_i]
+                observation, reward, ep_end, _ = env.step(action)
+                state_dash = observation.astype(np.float32).reshape((1, n_st))
+                if ep_end:
+                    print('max t:', t)
+                    print('loss:', agent.loss)
+                    list_t.append(t)
+                    list_loss.append(agent.loss)
+                    break
+
         end_flag_count = len(glob.glob(end_flag_folder + '*'))
+    
+    fig = plt.figure()
+    ax1 = fig.add_subplot(2, 1, 1)
+    ax1.plot(list_t)
+    ax2 = fig.add_subplot(2, 1, 2)
+    ax2.plot(list_loss)
+    plt.show()
+    # env.Monitor.close()
+
+    agent.save_model('DQN.model')
+
 
     print('yes!')

@@ -138,7 +138,6 @@ class DQNSlave(DQN):
     def load_model_share(self, inputfile):
         while 1:
             if os.path.exists(inputfile):
-                sleep(5)
                 serializers.load_npz(inputfile, self.model)
                 break
         print('load_model_share !')
@@ -213,7 +212,6 @@ if __name__ == "__main__":
             state_dash = observation.astype(np.float32).reshape((1, n_st))
 
             reward_true = t / 200
-            sleep(10)
 
             # new: 增加异常处理
             agent.stock_experience(state, act_i, reward_true, state_dash, ep_end)
@@ -229,11 +227,4 @@ if __name__ == "__main__":
     end_flag = True
     pickle.dump(end_flag, open(end_flag_file, 'wb'))
     fig = plt.figure()
-    ax1 = fig.add_subplot(2, 1, 1)
-    ax1.plot(list_t)
-    ax2 = fig.add_subplot(2, 1, 2)
-    ax2.plot(list_loss)
-    plt.show()
-    # env.Monitor.close()
-
-    agent.save_model('DQN.model')
+    ax1 = 
